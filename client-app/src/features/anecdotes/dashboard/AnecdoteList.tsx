@@ -1,19 +1,17 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useContext } from 'react'
 import { Card, Icon, Image, Label, Button } from 'semantic-ui-react'
-import { IAnecdote } from '../../../app/models/anecdote'
+import { observer } from 'mobx-react-lite'
+import AnecdoteStore from '../../../app/stores/anecdoteStore'
 
-interface IProps {
-    anecdotes: IAnecdote[]
-    selectAnecdote: (id: number) => void
-    deleteAnecdote: (id: number) => void
-}
 
-const AnecdoteList: React.FC<IProps> = ({ anecdotes, selectAnecdote, deleteAnecdote }) => {
 
+const AnecdoteList: React.FC = () => {
+    const anecdoteStore = useContext(AnecdoteStore)
+    const {anecdotesByDate, selectAnecdote, deleteAnecdote, submitting, target} = anecdoteStore
 
     return (
         <Fragment>
-            {anecdotes.map(anecdote => (
+            {anecdotesByDate.map(anecdote => (
                 <Card className="anecdote" key={anecdote.id}>
                     <Label.Group>
                         <Label color='black'>{anecdote.category}</Label>
@@ -30,7 +28,7 @@ const AnecdoteList: React.FC<IProps> = ({ anecdotes, selectAnecdote, deleteAnecd
                         </Card.Description>
                     </Card.Content>
                     <Card.Content extra>
-                        <Button floated='right' content='Delete' color='red' onClick={() => deleteAnecdote(anecdote.id)} />
+                        <Button name={anecdote.id} floated='right' content='Delete' color='red' onClick={(e) => deleteAnecdote(e, anecdote.id)} loading={target === anecdote.id.toString() && submitting} />
                         <Button floated='right' content='View' color='blue' onClick={() => selectAnecdote(anecdote.id)} />
                     </Card.Content>
                 </Card>
@@ -42,4 +40,4 @@ const AnecdoteList: React.FC<IProps> = ({ anecdotes, selectAnecdote, deleteAnecd
     )
 }
 
-export default AnecdoteList
+export default observer(AnecdoteList)

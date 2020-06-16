@@ -1,11 +1,11 @@
-import React from 'react'
-import { Menu, Container, Button, Header, Responsive } from 'semantic-ui-react'
+import React, { useContext } from 'react'
+import { Menu, Container, Button, Responsive } from 'semantic-ui-react'
+import AnecdoteStore from '../../app/stores/anecdoteStore'
+import { observer } from 'mobx-react-lite'
 
-interface IProps {
-	openCreateForm: () => void
-}
+const NavBar: React.FC = () => {
+	const anecdoteStore = useContext(AnecdoteStore)
 
-const NavBar: React.FC<IProps> = ({openCreateForm}) => {
 	return (
 		<Menu fixed='top' inverted>
 			<Container fluid>
@@ -15,11 +15,11 @@ const NavBar: React.FC<IProps> = ({openCreateForm}) => {
 				</Menu.Item>
 				<Menu.Item name='Anekdotlar' />
 				<Menu.Item>
-					<Button positive content='Anekdot paylaş' onClick={openCreateForm} />
+					<Button positive content='Anekdot paylaş' onClick={anecdoteStore.openCreateForm} />
 				</Menu.Item>
 			</Container>
 		</Menu>
 	)
 }
 
-export default NavBar
+export default observer(NavBar)

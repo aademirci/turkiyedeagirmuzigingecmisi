@@ -1,16 +1,17 @@
-import React, { useState, FormEvent } from 'react'
+import React, { useState, FormEvent, useContext } from 'react'
 import { Segment, Form, Button } from 'semantic-ui-react'
 import { IAnecdote } from '../../../app/models/anecdote'
+import AnecdoteStore from '../../../app/stores/anecdoteStore'
+import { observer } from 'mobx-react-lite'
 
 interface IProps {
-    setEditMode: (editMode: boolean) => void
     anecdote: IAnecdote
-    createAnecdote: (anecdote: IAnecdote) => void
-    editAnecdote: (anecdote: IAnecdote) => void
-    anecdoteIndex: number
 }
 
-const AnecdoteForm: React.FC<IProps> = ({setEditMode, anecdote: initialFormState, createAnecdote, editAnecdote, anecdoteIndex}) => {
+const AnecdoteForm: React.FC<IProps> = ({ anecdote: initialFormState}) => {
+    const anecdoteStore = useContext(AnecdoteStore)
+    const {createAnecdote, editAnecdote, submitting, cancelFormOpen, anecdoteIndex} = anecdoteStore
+
     const initialiseForm = () => {
         if(initialFormState){
             return initialFormState
@@ -55,11 +56,11 @@ const AnecdoteForm: React.FC<IProps> = ({setEditMode, anecdote: initialFormState
                 <Form.Input type='date' onChange={handleInputChange} name='date' placeholder='Tarih' value={anecdote.date} />
                 <Form.Input onChange={handleInputChange} name='city' placeholder='Şehir' value={anecdote.city} />
                 <Form.Input onChange={handleInputChange} name='venue' placeholder='Mekan' value={anecdote.venue} />
-                <Button positive type='submit' content='Submit' />
-                <Button type='button' content='Iptal' onClick={() => setEditMode(false)} />
+                <Button positive type='submit' content='Submit' loading={submitting} />
+                <Button type='button' content='Iptal' onClick={cancelFormOpen} />
             </Form>
         </Segment>
     )
 }
 
-export default AnecdoteForm
+export default observer(AnecdoteForm)
