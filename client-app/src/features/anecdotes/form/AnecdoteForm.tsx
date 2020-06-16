@@ -1,34 +1,36 @@
-import React, { useState, FormEvent, useContext } from 'react'
+import React, { useState, FormEvent, useContext, useEffect } from 'react'
 import { Segment, Form, Button } from 'semantic-ui-react'
 import { IAnecdote } from '../../../app/models/anecdote'
 import AnecdoteStore from '../../../app/stores/anecdoteStore'
 import { observer } from 'mobx-react-lite'
+import { RouteComponentProps } from 'react-router-dom'
 
-interface IProps {
-    anecdote: IAnecdote
+interface DetailParams {
+    id: string
 }
 
-const AnecdoteForm: React.FC<IProps> = ({ anecdote: initialFormState}) => {
+const AnecdoteForm: React.FC<RouteComponentProps<DetailParams>> = ({match, history}) => {
     const anecdoteStore = useContext(AnecdoteStore)
-    const {createAnecdote, editAnecdote, submitting, cancelFormOpen, anecdoteIndex} = anecdoteStore
+    const {createAnecdote, editAnecdote, submitting, anecdote: initialFormState, loadAnecdote, clearAnecdote, anecdoteIndex} = anecdoteStore
 
-    const initialiseForm = () => {
-        if(initialFormState){
-            return initialFormState
-        } else {
-            return {
-                id: 0,
-                title: '',
-                category: '',
-                description: '',
-                date: '',
-                city: '',
-                venue: ''
-            }
+    const [anecdote, setAnecdote] = useState<IAnecdote>({
+        id: 0,
+        title: '',
+        category: '',
+        description: '',
+        date: '',
+        city: '',
+        venue: ''
+    })
+
+    useEffect(() => {
+        if (match.params.id && anecdote.id === 0) {
+            loadAnecdote(parseInt(match.params.id)).then(() => initialFormState && setAnecdote(initialFormState))
         }
-    }
-
-    const [anecdote, setAnecdote] = useState<IAnecdote>(initialiseForm)
+        return () => {
+            clearAnecdote()
+        }
+    }, [loadAnecdote, clearAnecdote, match.params.id, initialFormState, anecdote.id])
 
     const handleSubmit = () => {
         if (anecdote.id === 0) {
@@ -36,9 +38,9 @@ const AnecdoteForm: React.FC<IProps> = ({ anecdote: initialFormState}) => {
                 ...anecdote,
                 id: anecdoteIndex + 1
             }
-            createAnecdote(newAnecdote)
+            createAnecdote(newAnecdote).then(() => history.push(`/anecdote/${newAnecdote.id}`))
         } else {
-            editAnecdote(anecdote)
+            editAnecdote(anecdote).then(() => history.push(`/anecdote/${anecdote.id}`))
         }
     }
 
@@ -57,7 +59,7 @@ const AnecdoteForm: React.FC<IProps> = ({ anecdote: initialFormState}) => {
                 <Form.Input onChange={handleInputChange} name='city' placeholder='Şehir' value={anecdote.city} />
                 <Form.Input onChange={handleInputChange} name='venue' placeholder='Mekan' value={anecdote.venue} />
                 <Button positive type='submit' content='Submit' loading={submitting} />
-                <Button type='button' content='Iptal' onClick={cancelFormOpen} />
+                <Button type='button' content='Iptal' onClick={() => history.push('/anecdotes')} />
             </Form>
         </Segment>
     )

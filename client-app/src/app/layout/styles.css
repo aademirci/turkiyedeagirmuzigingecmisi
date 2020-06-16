@@ -1,10 +1,11 @@
 .main-section { height: 100%; padding: 20px 20px 20px 20px; white-space: nowrap; cursor: grab; }
 
-.anecdote { width: 100%; height: calc(100vh - 173px); overflow-y: auto; display: inline-block !important; vertical-align: top; margin: 0 0 0 20px !important; white-space: normal; position: relative;}
+.anecdote { width: 100%; height: calc(100vh - 167px); overflow-y: auto; display: inline-block !important; vertical-align: top; margin: 0 0 0 20px !important; white-space: normal; position: relative;}
 .anecdote .labels { position: absolute; top: 20px; left: 20px; z-index: 9;}
 .anecdote .label { display: block; margin-bottom: 0 !important; border-radius: 0 !important; width: fit-content; text-transform: uppercase;}
-.anecdote-nav { padding-top: 97px; }
+.anecdote-nav { padding-top: 0; }
 
+.ui.menu { border-radius: 0; }
 i.chevron.down.icon { padding-left: 5px; padding-top: 1px;}
 
 @media screen and (min-width: 480px){

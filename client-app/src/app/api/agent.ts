@@ -14,7 +14,7 @@ const requests = {
 
 const Anecdotes = {
     list: ():Promise<IAnecdote[]> => requests.get('/anecdotes'),
-    details: (id: string) => requests.get(`/anecdotes/${id}`),
+    details: (id: number) => requests.get(`/anecdotes/${id}`),
     create: (anecdote: IAnecdote) => requests.post('/anecdotes', anecdote),
     update: (anecdote: IAnecdote) => requests.put(`/anecdotes/${anecdote.id}`, anecdote),
     delete: (id: number) => requests.del(`/anecdotes/${id}`)

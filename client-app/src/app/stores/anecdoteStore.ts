@@ -2,15 +2,14 @@ import { observable, action, computed, configure, runInAction } from 'mobx'
 import { createContext, SyntheticEvent } from 'react'
 import { IAnecdote } from '../models/anecdote'
 import agent from '../api/agent'
+import 'mobx-react-lite/batchingForReactDom'
 
 configure({ enforceActions: 'always' })
 
 export class AnecdoteStore {
     @observable anecdoteRegistry = new Map()
-    @observable anecdotes: IAnecdote[] = []
-    @observable selectedAnecdote: IAnecdote | undefined
+    @observable anecdote: IAnecdote | null = null
     @observable loadingInitial = false
-    @observable editMode = false
     @observable submitting = false
     @observable target = ''
     @observable anecdoteIndex = 0
@@ -38,13 +37,42 @@ export class AnecdoteStore {
         }
     }
 
+    @action loadAnecdote = async (id: number) => {
+        let anecdote = this.getAnecdote(id)
+        if (anecdote){
+            this.anecdote = anecdote
+            return anecdote
+        } else {
+            this.loadingInitial = true
+            try {
+                anecdote = await agent.Anecdotes.details(id)
+                runInAction('getting an anecdote', () => {
+                    this.anecdote = anecdote
+                    this.loadingInitial = false
+                })
+            } catch (error) {
+                runInAction('get anecdote error', () => {
+                    this.loadingInitial = false
+                })
+                console.log(error)
+            }
+        }
+    }
+
+    @action clearAnecdote = () => {
+        this.anecdote = null
+    }
+
+    getAnecdote = (id: number) => {
+        return this.anecdoteRegistry.get(id)
+    }
+
     @action createAnecdote = async (anecdote: IAnecdote) => {
         this.submitting = true
         try {
             await agent.Anecdotes.create(anecdote)
             runInAction('creating an anecdote', () => {
                 this.anecdoteRegistry.set(anecdote.id, anecdote)
-                this.editMode = false
                 this.submitting = false
             })
         } catch (error) {
@@ -61,8 +89,7 @@ export class AnecdoteStore {
             await agent.Anecdotes.update(anecdote)
             runInAction('editing an anecdote', () => {
                 this.anecdoteRegistry.set(anecdote.id, anecdote)
-                this.selectedAnecdote = anecdote
-                this.editMode = false
+                this.anecdote = anecdote
                 this.submitting = false
             })
         } catch (error) {
@@ -90,29 +117,6 @@ export class AnecdoteStore {
             })
             console.log(error)
         }
-    }
-
-    @action openCreateForm = () => {
-        this.editMode = true
-        this.selectedAnecdote = undefined
-    }
-
-    @action openEditForm = (id: number) => {
-        this.selectedAnecdote = this.anecdoteRegistry.get(id)
-        this.editMode = true
-    }
-
-    @action cancelSelectedAnecdote = () => {
-        this.selectedAnecdote = undefined
-    }
-
-    @action cancelFormOpen = () => {
-        this.editMode = false
-    }
-
-    @action selectAnecdote = (id: number) => {
-        this.selectedAnecdote = this.anecdoteRegistry.get(id)
-        this.editMode = false
     }
 }
 
