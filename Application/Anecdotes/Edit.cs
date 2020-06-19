@@ -1,6 +1,9 @@
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Errors;
+using FluentValidation;
 using MediatR;
 using Persistence;
 
@@ -19,6 +22,16 @@ namespace Application.Anecdotes
             public string Venue { get; set; }
         }
 
+        public class CommandValidator : AbstractValidator<Command>
+        {
+            public CommandValidator()
+            {
+                RuleFor(x => x.Title).NotEmpty();
+                RuleFor(x => x.Category).NotEmpty();
+                RuleFor(x => x.Date).NotEmpty();
+            }
+        }
+
         public class Handler : IRequestHandler<Command>
         {
             private readonly DataContext _context;
@@ -31,8 +44,8 @@ namespace Application.Anecdotes
             {
                 var anecdote = await _context.Anecdotes.FindAsync(request.Id);
 
-                if(anecdote == null)
-                    throw new Exception("Could not find anecdote");
+                if (anecdote == null)
+                    throw new RestException(HttpStatusCode.NotFound, new {anecdote = "Not found"});
 
                 anecdote.Title = request.Title ?? anecdote.Title;
                 anecdote.Description = request.Description ?? anecdote.Description;

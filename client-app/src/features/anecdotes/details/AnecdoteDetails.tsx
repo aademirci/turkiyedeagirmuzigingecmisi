@@ -21,8 +21,8 @@ const AnecdoteDetails: React.FC<RouteComponentProps<DetailParams>> = ({match}) =
 
     return (
         <div>
-            {anecdote!.title}
-            {anecdote!.description}
+            {anecdote.title}
+            {anecdote.description}
             <Button as={Link} to={`/edit/${anecdote.id}`} content='Edit' color='blue' />
         </div>
     )

@@ -1,6 +1,8 @@
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Errors;
 using MediatR;
 using Persistence;
 
@@ -26,7 +28,7 @@ namespace Application.Anecdotes
                         var anecdote = await _context.Anecdotes.FindAsync(request.Id);
 
                         if (anecdote == null)
-                            throw new Exception("Could not find anecdote");
+                            throw new RestException(HttpStatusCode.NotFound, new {anecdote = "Not found"});
 
                         _context.Remove(anecdote);
 
