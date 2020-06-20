@@ -3,6 +3,8 @@ import { createContext, SyntheticEvent } from 'react'
 import { IAnecdote } from '../models/anecdote'
 import agent from '../api/agent'
 import 'mobx-react-lite/batchingForReactDom'
+import { history } from '../..'
+import { toast } from 'react-toastify'
 
 configure({ enforceActions: 'always' })
 
@@ -12,10 +14,21 @@ export class AnecdoteStore {
     @observable loadingInitial = false
     @observable submitting = false
     @observable target = ''
-    @observable anecdoteIndex = 0
 
     @computed get anecdotesByDate() {
         return Array.from(this.anecdoteRegistry.values()).sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
+    }
+
+    @action getAnecdoteIndex = async () => {
+        const anecdotes = await agent.Anecdotes.list()
+        runInAction('loading anecdotes', () => {
+            anecdotes.forEach((anecdote) => {
+                anecdote.date = new Date(anecdote.date);
+                this.anecdoteRegistry.set(anecdote.id, anecdote)
+            })
+        })
+
+        return Array.from(this.anecdoteRegistry.keys())[this.anecdoteRegistry.size - 1]
     }
 
     @action loadAnecdotes = async () => {
@@ -24,9 +37,9 @@ export class AnecdoteStore {
             const anecdotes = await agent.Anecdotes.list()
             runInAction('loading anecdotes', () => {
                 anecdotes.forEach((anecdote) => {
+                    anecdote.date = new Date(anecdote.date);
                     this.anecdoteRegistry.set(anecdote.id, anecdote)
                 })
-                this.anecdoteIndex = anecdotes[anecdotes.length - 1].id
                 this.loadingInitial = false
             })
         } catch (error) {
@@ -39,7 +52,7 @@ export class AnecdoteStore {
 
     @action loadAnecdote = async (id: number) => {
         let anecdote = this.getAnecdote(id)
-        if (anecdote){
+        if (anecdote) {
             this.anecdote = anecdote
             return anecdote
         } else {
@@ -47,9 +60,12 @@ export class AnecdoteStore {
             try {
                 anecdote = await agent.Anecdotes.details(id)
                 runInAction('getting an anecdote', () => {
+                    anecdote.date = new Date(anecdote.date);
                     this.anecdote = anecdote
+                    this.anecdoteRegistry.set(anecdote.id, anecdote);
                     this.loadingInitial = false
                 })
+                return anecdote
             } catch (error) {
                 runInAction('get anecdote error', () => {
                     this.loadingInitial = false
@@ -75,10 +91,12 @@ export class AnecdoteStore {
                 this.anecdoteRegistry.set(anecdote.id, anecdote)
                 this.submitting = false
             })
+            history.push(`/anecdote/${anecdote.id}`)
         } catch (error) {
             runInAction('create anecdote error', () => {
                 this.submitting = false
             })
+            toast.error('Problem submitting data')
             console.log(error)
         }
     }
@@ -92,10 +110,12 @@ export class AnecdoteStore {
                 this.anecdote = anecdote
                 this.submitting = false
             })
+            history.push(`/anecdote/${anecdote.id}`)
         } catch (error) {
             runInAction('edit anecdote error', () => {
                 this.submitting = false
             })
+            toast.error('Problem submitting data')
             console.log(error)
         }
     }

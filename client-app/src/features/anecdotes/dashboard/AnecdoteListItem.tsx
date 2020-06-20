@@ -3,6 +3,8 @@ import { Card, Label, Image, Icon, Button } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 import AnecdoteStore from '../../../app/stores/anecdoteStore'
 import { IAnecdote } from '../../../app/models/anecdote'
+import { format } from 'date-fns'
+import { tr } from 'date-fns/locale'
 
 const AnecdoteListItem: React.FC<{anecdote: IAnecdote}> = ({anecdote}) => {
     const anecdoteStore = useContext(AnecdoteStore)
@@ -12,7 +14,7 @@ const AnecdoteListItem: React.FC<{anecdote: IAnecdote}> = ({anecdote}) => {
         <Card className="anecdote">
             <Label.Group>
                 <Label color='black'>{anecdote.category}</Label>
-                <Label color='black'>{anecdote.date}</Label>
+                <Label color='black'>{format(anecdote.date, 'd MMMM yyyy', {locale: tr})}</Label>
             </Label.Group>
             <Image src='https://tamg.aademirci.com/wp-content/uploads/2019/01/Gong-Putlar-Yikiliyor.jpg' wrapped ui={false} />
             <Card.Content>

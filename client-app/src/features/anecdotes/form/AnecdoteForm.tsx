@@ -1,66 +1,77 @@
-import React, { useState, FormEvent, useContext, useEffect } from 'react'
+import React, { useState, useContext, useEffect } from 'react'
 import { Segment, Form, Button } from 'semantic-ui-react'
-import { IAnecdote } from '../../../app/models/anecdote'
+import { AnecdoteFormValues } from '../../../app/models/anecdote'
 import AnecdoteStore from '../../../app/stores/anecdoteStore'
 import { observer } from 'mobx-react-lite'
 import { RouteComponentProps } from 'react-router-dom'
+import { Form as FinalForm, Field } from 'react-final-form'
+import TextInput from '../../../app/common/form/TextInput'
+import TextAreaInput from '../../../app/common/form/TextAreaInput'
+import SelectInput from '../../../app/common/form/SelectInput'
+import { category } from '../../../app/common/options/categoryOptions'
+import DateInput from '../../../app/common/form/DateInput'
+import { combineDateAndTime } from '../../../app/common/util/util'
+import { combineValidators, isRequired } from 'revalidate'
+
+const validate = combineValidators({
+    title: isRequired({message: 'Başlık gereklidir'}),
+    category: isRequired('Category'),
+    date: isRequired('Date')
+})
 
 interface DetailParams {
     id: string
 }
 
-const AnecdoteForm: React.FC<RouteComponentProps<DetailParams>> = ({match, history}) => {
+const AnecdoteForm: React.FC<RouteComponentProps<DetailParams>> = ({ match, history }) => {
     const anecdoteStore = useContext(AnecdoteStore)
-    const {createAnecdote, editAnecdote, submitting, anecdote: initialFormState, loadAnecdote, clearAnecdote, anecdoteIndex} = anecdoteStore
+    const { createAnecdote, editAnecdote, submitting, loadAnecdote, getAnecdoteIndex } = anecdoteStore
 
-    const [anecdote, setAnecdote] = useState<IAnecdote>({
-        id: 0,
-        title: '',
-        category: '',
-        description: '',
-        date: '',
-        city: '',
-        venue: ''
-    })
+    const [anecdote, setAnecdote] = useState(new AnecdoteFormValues())
+    const [loading, setLoading] = useState(false)
+    const [anecdoteIndex, setAnecdoteIndex] = useState(0)
+    
 
     useEffect(() => {
-        if (match.params.id && anecdote.id === 0) {
-            loadAnecdote(parseInt(match.params.id)).then(() => initialFormState && setAnecdote(initialFormState))
+        if (match.params.id) {
+            setLoading(true)
+            loadAnecdote(parseInt(match.params.id)).then((anecdote) => setAnecdote(new AnecdoteFormValues(anecdote))).finally(() => setLoading(false))
+        } else {
+            setLoading(true)
+            getAnecdoteIndex().then((result) => setAnecdoteIndex(result)).finally(() => setLoading(false))
         }
-        return () => {
-            clearAnecdote()
-        }
-    }, [loadAnecdote, clearAnecdote, match.params.id, initialFormState, anecdote.id])
+    }, [loadAnecdote, match.params.id, getAnecdoteIndex])
 
-    const handleSubmit = () => {
-        if (anecdote.id === 0) {
+    const handleFinalFormSubmit = (values: any) => {
+        const dateAndTime = combineDateAndTime(values.date)
+        const {date, ...anecdote} = values
+        anecdote.date = dateAndTime
+        if (!anecdote.id) {
             let newAnecdote = {
                 ...anecdote,
                 id: anecdoteIndex + 1
             }
-            createAnecdote(newAnecdote).then(() => history.push(`/anecdote/${newAnecdote.id}`))
+            console.log(anecdote)
+            createAnecdote(newAnecdote)
         } else {
-            editAnecdote(anecdote).then(() => history.push(`/anecdote/${anecdote.id}`))
+            editAnecdote(anecdote)
         }
-    }
-
-    const handleInputChange = (event: FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value } = event.currentTarget
-        setAnecdote({...anecdote, [name]: value})
     }
 
     return (
         <Segment>
-            <Form onSubmit={handleSubmit}>
-                <Form.Input onChange={handleInputChange} name='title' placeholder='Başlık' value={anecdote.title} />
-                <Form.TextArea rows={2} onChange={handleInputChange} name='description' placeholder='Açıklama' value={anecdote.description} />
-                <Form.Input onChange={handleInputChange} name='category' placeholder='Kategori' value={anecdote.category} />
-                <Form.Input type='date' onChange={handleInputChange} name='date' placeholder='Tarih' value={anecdote.date} />
-                <Form.Input onChange={handleInputChange} name='city' placeholder='Şehir' value={anecdote.city} />
-                <Form.Input onChange={handleInputChange} name='venue' placeholder='Mekan' value={anecdote.venue} />
-                <Button positive type='submit' content='Submit' loading={submitting} />
-                <Button type='button' content='Iptal' onClick={() => history.push('/anecdotes')} />
-            </Form>
+            <FinalForm validate={validate} initialValues={anecdote} onSubmit={handleFinalFormSubmit} render={({ handleSubmit, invalid, pristine }) => (
+                <Form onSubmit={handleSubmit} loading={loading}>
+                    <Field name='title' placeholder='Başlık' value={anecdote.title} component={TextInput} />
+                    <Field name='description' placeholder='Açıklama' value={anecdote.description} rows={3} component={TextAreaInput} />
+                    <Field name='category' placeholder='Kategori' value={anecdote.category} options={category} component={SelectInput} />
+                    <Field name='date' placeholder='Tarih' value={anecdote.date} component={DateInput} />
+                    <Field name='city' placeholder='Şehir' value={anecdote.city} component={TextInput} />
+                    <Field name='venue' placeholder='Mekan' value={anecdote.venue} component={TextInput} />
+                    <Button positive type='submit' content='Submit' loading={submitting} disabled={loading || invalid || pristine} />
+                    <Button type='button' content='Iptal' onClick={anecdote.id ? () => history.push(`/anecdote/${anecdote.id}`) : () => history.push('/anecdotes')} disabled={loading} />
+                </Form>
+            )} />
         </Segment>
     )
 }
