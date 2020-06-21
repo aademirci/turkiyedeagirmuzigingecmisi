@@ -3,17 +3,18 @@ import AnecdoteList from './AnecdoteList'
 import ScrollContainer from 'react-indiana-drag-scroll'
 import AnecdoteNav from '../../nav/AnecdoteNav'
 import { observer } from 'mobx-react-lite'
-import AnecdoteStore from '../../../app/stores/anecdoteStore'
 import LoadingComponent from '../../../app/layout/LoadingComponent'
+import { RootStoreContext } from '../../../app/stores/rootStore'
 
 const AnecdoteDashboard: React.FC = () => {
-    const anecdoteStore = useContext(AnecdoteStore)
+    const rootStore = useContext(RootStoreContext)
+    const {loadAnecdotes, loadingInitial} = rootStore.anecdoteStore
 
     useEffect(() => {
-        anecdoteStore.loadAnecdotes()
-    }, [anecdoteStore])
+        loadAnecdotes()
+    }, [loadAnecdotes])
 
-    if (anecdoteStore.loadingInitial) return <LoadingComponent content='Anekdotlar yükleniyor...' />
+    if (loadingInitial) return <LoadingComponent content='Anekdotlar yükleniyor...' />
 
     return (
         <Fragment>

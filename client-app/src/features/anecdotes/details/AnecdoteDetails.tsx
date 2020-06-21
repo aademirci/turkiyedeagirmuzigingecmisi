@@ -1,17 +1,17 @@
 import React, { useContext, useEffect } from 'react'
 import { Button } from 'semantic-ui-react'
-import AnecdoteStore from '../../../app/stores/anecdoteStore'
 import { observer } from 'mobx-react-lite'
 import { RouteComponentProps, Link } from 'react-router-dom'
 import LoadingComponent from '../../../app/layout/LoadingComponent'
+import { RootStoreContext } from '../../../app/stores/rootStore'
 
 interface DetailParams {
     id: string
 }
 
 const AnecdoteDetails: React.FC<RouteComponentProps<DetailParams>> = ({match}) => {
-    const anecdoteStore = useContext(AnecdoteStore)
-    const {anecdote, loadAnecdote, loadingInitial} = anecdoteStore
+    const rootStore = useContext(RootStoreContext)
+    const {anecdote, loadAnecdote, loadingInitial} = rootStore.anecdoteStore
 
     useEffect(() => {
         loadAnecdote(parseInt(match.params.id))

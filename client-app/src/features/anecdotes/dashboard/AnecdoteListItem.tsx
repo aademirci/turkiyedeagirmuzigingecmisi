@@ -1,14 +1,14 @@
 import React, { useContext } from 'react'
 import { Card, Label, Image, Icon, Button } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
-import AnecdoteStore from '../../../app/stores/anecdoteStore'
 import { IAnecdote } from '../../../app/models/anecdote'
 import { format } from 'date-fns'
 import { tr } from 'date-fns/locale'
+import { RootStoreContext } from '../../../app/stores/rootStore'
 
 const AnecdoteListItem: React.FC<{anecdote: IAnecdote}> = ({anecdote}) => {
-    const anecdoteStore = useContext(AnecdoteStore)
-    const {deleteAnecdote, submitting, target} = anecdoteStore
+    const rootStore = useContext(RootStoreContext)
+    const {deleteAnecdote, submitting, target} = rootStore.anecdoteStore
 
     return (
         <Card className="anecdote">
@@ -20,7 +20,7 @@ const AnecdoteListItem: React.FC<{anecdote: IAnecdote}> = ({anecdote}) => {
             <Card.Content>
                 <Card.Header as={Link} to={`/anecdote/${anecdote.id}`}>{anecdote.title}</Card.Header>
                 <Card.Meta>
-                    <span className='date'><Icon name='map marker alternate' />{anecdote.venue}, {anecdote.city}</span>
+                    {anecdote.city && <span className='date'><Icon name='map marker alternate' />{anecdote.venue}, {anecdote.city}</span>}
                 </Card.Meta>
                 <Card.Description>
                     {anecdote.description}

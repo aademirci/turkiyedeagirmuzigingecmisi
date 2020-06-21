@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react'
-import { Segment, Form, Button } from 'semantic-ui-react'
+import { Form, Button, Container } from 'semantic-ui-react'
 import { AnecdoteFormValues } from '../../../app/models/anecdote'
-import AnecdoteStore from '../../../app/stores/anecdoteStore'
 import { observer } from 'mobx-react-lite'
 import { RouteComponentProps } from 'react-router-dom'
 import { Form as FinalForm, Field } from 'react-final-form'
@@ -12,6 +11,7 @@ import { category } from '../../../app/common/options/categoryOptions'
 import DateInput from '../../../app/common/form/DateInput'
 import { combineDateAndTime } from '../../../app/common/util/util'
 import { combineValidators, isRequired } from 'revalidate'
+import { RootStoreContext } from '../../../app/stores/rootStore'
 
 const validate = combineValidators({
     title: isRequired({message: 'Başlık gereklidir'}),
@@ -24,8 +24,8 @@ interface DetailParams {
 }
 
 const AnecdoteForm: React.FC<RouteComponentProps<DetailParams>> = ({ match, history }) => {
-    const anecdoteStore = useContext(AnecdoteStore)
-    const { createAnecdote, editAnecdote, submitting, loadAnecdote, getAnecdoteIndex } = anecdoteStore
+    const rootStore = useContext(RootStoreContext)
+    const { createAnecdote, editAnecdote, submitting, loadAnecdote, getAnecdoteIndex } = rootStore.anecdoteStore
 
     const [anecdote, setAnecdote] = useState(new AnecdoteFormValues())
     const [loading, setLoading] = useState(false)
@@ -59,7 +59,7 @@ const AnecdoteForm: React.FC<RouteComponentProps<DetailParams>> = ({ match, hist
     }
 
     return (
-        <Segment>
+        <Container>
             <FinalForm validate={validate} initialValues={anecdote} onSubmit={handleFinalFormSubmit} render={({ handleSubmit, invalid, pristine }) => (
                 <Form onSubmit={handleSubmit} loading={loading}>
                     <Field name='title' placeholder='Başlık' value={anecdote.title} component={TextInput} />
@@ -72,7 +72,7 @@ const AnecdoteForm: React.FC<RouteComponentProps<DetailParams>> = ({ match, hist
                     <Button type='button' content='Iptal' onClick={anecdote.id ? () => history.push(`/anecdote/${anecdote.id}`) : () => history.push('/anecdotes')} disabled={loading} />
                 </Form>
             )} />
-        </Segment>
+        </Container>
     )
 }
 

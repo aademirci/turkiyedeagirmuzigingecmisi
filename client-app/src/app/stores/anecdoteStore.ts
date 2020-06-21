@@ -1,14 +1,19 @@
-import { observable, action, computed, configure, runInAction } from 'mobx'
-import { createContext, SyntheticEvent } from 'react'
+import { observable, action, computed, runInAction } from 'mobx'
+import { SyntheticEvent } from 'react'
 import { IAnecdote } from '../models/anecdote'
 import agent from '../api/agent'
 import 'mobx-react-lite/batchingForReactDom'
 import { history } from '../..'
 import { toast } from 'react-toastify'
+import { RootStore } from './rootStore'
 
-configure({ enforceActions: 'always' })
+export default class AnecdoteStore {
+    rootStore: RootStore
 
-export class AnecdoteStore {
+    constructor(rootStore: RootStore) {
+        this.rootStore = rootStore
+    }
+
     @observable anecdoteRegistry = new Map()
     @observable anecdote: IAnecdote | null = null
     @observable loadingInitial = false
@@ -139,5 +144,3 @@ export class AnecdoteStore {
         }
     }
 }
-
-export default createContext(new AnecdoteStore())
