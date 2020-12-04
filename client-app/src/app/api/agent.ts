@@ -41,7 +41,9 @@ const Anecdotes = {
     details: (id: number) => requests.get(`/anecdotes/${id}`),
     create: (anecdote: IAnecdote) => requests.post('/anecdotes', anecdote),
     update: (anecdote: IAnecdote) => requests.put(`/anecdotes/${anecdote.id}`, anecdote),
-    delete: (id: number) => requests.del(`/anecdotes/${id}`)
+    delete: (id: number) => requests.del(`/anecdotes/${id}`),
+    fave: (id: number) => requests.post(`/anecdotes/${id}/fave`, {}),
+    unfave: (id: number) => requests.del(`/anecdotes/${id}/fave`)
 }
 
 const User = {

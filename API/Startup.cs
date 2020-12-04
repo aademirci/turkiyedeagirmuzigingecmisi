@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Middleware;
 using Application.Anecdotes;
 using Application.Interfaces;
+using AutoMapper;
 using Domain;
 using FluentValidation.AspNetCore;
 using Infrastructure.Security;
@@ -40,19 +41,26 @@ namespace API
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DataContext>(opt => {
+            services.AddDbContext<DataContext>(opt =>
+            {
+                opt.UseLazyLoadingProxies();
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
-            services.AddCors(opt => {
-                opt.AddPolicy("CorsPolicy", policy => {
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy("CorsPolicy", policy =>
+                {
                     policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000");
                 });
             });
             services.AddMediatR(typeof(List.Handler).Assembly);
-            services.AddControllers(opt => {
+            services.AddAutoMapper(typeof(List.Handler));
+            services.AddControllers(opt =>
+            {
                 var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
                 opt.Filters.Add(new AuthorizeFilter(policy));
-            }).AddFluentValidation(cfg => {
+            }).AddFluentValidation(cfg =>
+            {
                 cfg.RegisterValidatorsFromAssemblyContaining<Create>();
             });
 
@@ -61,8 +69,18 @@ namespace API
             identityBuilder.AddEntityFrameworkStores<DataContext>();
             identityBuilder.AddSignInManager<SignInManager<AppUser>>();
 
+            services.AddAuthorization(opt =>
+            {
+                opt.AddPolicy("IsAnecdoteHost", policy =>
+                {
+                    policy.Requirements.Add(new IsOwnerRequirement());
+                });
+            });
+            services.AddTransient<IAuthorizationHandler, IsOwnerRequirementHandler>();
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"]));
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt => {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(opt =>
+            {
                 opt.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
@@ -80,7 +98,7 @@ namespace API
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseMiddleware<ErrorHandlingMiddleware>();
-            
+
             if (env.IsDevelopment())
             {
                 // app.UseDeveloperExceptionPage();

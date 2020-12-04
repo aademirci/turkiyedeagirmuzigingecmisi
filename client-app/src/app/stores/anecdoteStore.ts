@@ -6,6 +6,7 @@ import 'mobx-react-lite/batchingForReactDom'
 import { history } from '../..'
 import { toast } from 'react-toastify'
 import { RootStore } from './rootStore'
+import { createFavee, setAnecdoteProps } from '../common/util/util'
 
 export default class AnecdoteStore {
     rootStore: RootStore
@@ -19,6 +20,7 @@ export default class AnecdoteStore {
     @observable loadingInitial = false
     @observable submitting = false
     @observable target = ''
+    @observable loading = false
 
     @computed get anecdotesByDate() {
         return Array.from(this.anecdoteRegistry.values()).sort((a, b) => Date.parse(a.date) - Date.parse(b.date))
@@ -42,7 +44,7 @@ export default class AnecdoteStore {
             const anecdotes = await agent.Anecdotes.list()
             runInAction('loading anecdotes', () => {
                 anecdotes.forEach((anecdote) => {
-                    anecdote.date = new Date(anecdote.date);
+                    setAnecdoteProps(anecdote, this.rootStore.userStore.user!)
                     this.anecdoteRegistry.set(anecdote.id, anecdote)
                 })
                 this.loadingInitial = false
@@ -65,7 +67,7 @@ export default class AnecdoteStore {
             try {
                 anecdote = await agent.Anecdotes.details(id)
                 runInAction('getting an anecdote', () => {
-                    anecdote.date = new Date(anecdote.date);
+                    setAnecdoteProps(anecdote, this.rootStore.userStore.user!)
                     this.anecdote = anecdote
                     this.anecdoteRegistry.set(anecdote.id, anecdote);
                     this.loadingInitial = false
@@ -141,6 +143,49 @@ export default class AnecdoteStore {
                 this.target = ''
             })
             console.log(error)
+        }
+    }
+
+    @action faveAnecdote = async () => {
+        const favee = createFavee(this.rootStore.userStore.user!)
+        this.loading = true
+        try {
+            await agent.Anecdotes.fave(this.anecdote!.id)
+            runInAction(() => {
+                if (this.anecdote) {
+                    this.anecdote.favees.push(favee)
+                    this.anecdote.isFaved = true
+                    this.anecdoteRegistry.set(this.anecdote.id, this.anecdote)
+                    this.loading = false
+                }
+            })
+        } catch (error) {
+            runInAction(() => {
+                this.loading = false
+            })
+            toast.error('Problem signing up to activity')
+        }
+    }
+
+    @action cancelFave = async () => {
+        this.loading = true
+        try {
+            await agent.Anecdotes.unfave(this.anecdote!.id)
+            runInAction(() => {
+                if (this.anecdote) {
+                    this.anecdote.favees = this.anecdote.favees.filter(
+                        a => a.username !== this.rootStore.userStore.user!.username
+                    )
+                    this.anecdote.isFaved = false
+                    this.anecdoteRegistry.set(this.anecdote.id, this.anecdote)
+                    this.loading = false
+                }
+            })
+        } catch (error) {
+            runInAction(() => {
+                this.loading = false
+            })
+            toast.error('Problem cancelling attendance')
         }
     }
 }

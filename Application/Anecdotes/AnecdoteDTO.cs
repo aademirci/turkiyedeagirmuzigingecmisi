@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
-namespace Domain
+namespace Application.Anecdotes
 {
-    public class Anecdote
+    public class AnecdoteDTO
     {
         public int Id { get; set; }
         public string Title { get; set; }
@@ -12,6 +13,7 @@ namespace Domain
         public DateTime Date { get; set; }
         public string City { get; set; }
         public string Venue { get; set; }
-        public virtual ICollection<UserAnecdote> UserAnecdotes { get; set; }
+        [JsonPropertyName("favees")]
+        public ICollection<FaveeDTO> UserAnecdotes { get; set; }
     }
 }

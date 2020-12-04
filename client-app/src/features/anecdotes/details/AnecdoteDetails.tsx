@@ -4,6 +4,7 @@ import { observer } from 'mobx-react-lite'
 import { RouteComponentProps, Link } from 'react-router-dom'
 import LoadingComponent from '../../../app/layout/LoadingComponent'
 import { RootStoreContext } from '../../../app/stores/rootStore'
+import AnecdoteListItemFavee from '../dashboard/AnecdoteListItemFavee'
 
 interface DetailParams {
     id: string
@@ -11,7 +12,7 @@ interface DetailParams {
 
 const AnecdoteDetails: React.FC<RouteComponentProps<DetailParams>> = ({match}) => {
     const rootStore = useContext(RootStoreContext)
-    const {anecdote, loadAnecdote, loadingInitial} = rootStore.anecdoteStore
+    const {anecdote, loadAnecdote, loadingInitial, faveAnecdote, cancelFave, loading} = rootStore.anecdoteStore
 
     useEffect(() => {
         loadAnecdote(parseInt(match.params.id))
@@ -23,7 +24,11 @@ const AnecdoteDetails: React.FC<RouteComponentProps<DetailParams>> = ({match}) =
         <div>
             {anecdote.title}
             {anecdote.description}
-            <Button as={Link} to={`/edit/${anecdote.id}`} content='Edit' color='blue' />
+            {anecdote.isOwner ? (<Button as={Link} to={`/edit/${anecdote.id}`} content='Edit' color='blue' />) : (<span></span>)}
+            {anecdote.isFaved ? (<Button loading={loading} onClick={cancelFave}>Unfav</Button>) : (<Button loading={loading} onClick={faveAnecdote}>Fav</Button>)}
+            
+            
+            <AnecdoteListItemFavee favees={anecdote.favees} />
         </div>
     )
 }

@@ -6,6 +6,9 @@ export interface IAnecdote {
     date: Date
     city: string
     venue: string
+    isFaved: boolean
+    isOwner: boolean
+    favees: IFavee[]
 }
 
 export class AnecdoteFormValues implements Partial<IAnecdote> {
@@ -20,4 +23,11 @@ export class AnecdoteFormValues implements Partial<IAnecdote> {
     constructor(init?: IAnecdote) {
         Object.assign(this, init)
     }
+}
+
+export interface IFavee {
+    username: string
+    displayName: string
+    image: string
+    isOwner: boolean
 }

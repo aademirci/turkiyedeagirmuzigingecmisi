@@ -17,12 +17,14 @@ namespace Persistence
                 {
                     new AppUser
                     {
+                        Id = "a",
                         DisplayName = "Alper Demirci",
                         UserName = "aademirci",
                         Email = "aalperdemirci@gmail.com"
                     },
                     new AppUser
                     {
+                        Id = "b",
                         DisplayName = "Bob",
                         UserName = "bob",
                         Email = "bob@test.com"
@@ -45,7 +47,16 @@ namespace Persistence
                         Description = "Türkiye’de 1980 sonrası rock hareketinin ilk konseri olduğu kabul edilir. Exorcist Child, Devil’in o zamanlardaki adıydı.",
                         Category = "konser",
                         City = "Istanbul",
-                        Venue = "Fitaş Sineması"
+                        Venue = "Fitaş Sineması",
+                        UserAnecdotes = new List<UserAnecdote>
+                        {
+                            new UserAnecdote
+                            {
+                                AppUserId = "a",
+                                IsOwner = true,
+                                DateFaved = DateTime.Now
+                            }
+                        }
                     },
                     new Anecdote
                     {
@@ -54,12 +65,27 @@ namespace Persistence
                         Description = "Egzotik Band’in ikinci konseriydi.",
                         Category = "konser",
                         City = "Istanbul",
-                        Venue = "Fitaş Sineması"
+                        Venue = "Fitaş Sineması",
+                        UserAnecdotes = new List<UserAnecdote>
+                        {
+                            new UserAnecdote
+                            {
+                                AppUserId = "b",
+                                IsOwner = true,
+                                DateFaved = DateTime.Now
+                            },
+                            new UserAnecdote
+                            {
+                                AppUserId = "a",
+                                IsOwner = false,
+                                DateFaved = DateTime.Now
+                            }
+                        }
                     }
                 };
 
-                context.Anecdotes.AddRange(anecdotes);
-                context.SaveChanges();
+                await context.Anecdotes.AddRangeAsync(anecdotes);
+                await context.SaveChangesAsync();
             }
         }
     }
