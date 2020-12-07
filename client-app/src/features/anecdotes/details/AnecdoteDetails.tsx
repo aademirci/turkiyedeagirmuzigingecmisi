@@ -24,8 +24,9 @@ const AnecdoteDetails: React.FC<RouteComponentProps<DetailParams>> = ({match}) =
         <div>
             {anecdote.title}
             {anecdote.description}
-            {anecdote.isOwner ? (<Button as={Link} to={`/edit/${anecdote.id}`} content='Edit' color='blue' />) : (<span></span>)}
-            {anecdote.isFaved ? (<Button loading={loading} onClick={cancelFave}>Unfav</Button>) : (<Button loading={loading} onClick={faveAnecdote}>Fav</Button>)}
+            {anecdote.isOwner ? 
+                (<Button as={Link} to={`/edit/${anecdote.id}`} content='Edit' color='blue' />) : anecdote.isFaved ?
+                    (<Button loading={loading} onClick={cancelFave}>Unfav</Button>) : (<Button loading={loading} onClick={faveAnecdote}>Fav</Button>)}
             
             
             <AnecdoteListItemFavee favees={anecdote.favees} />

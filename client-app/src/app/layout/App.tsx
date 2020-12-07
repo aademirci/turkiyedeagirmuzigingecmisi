@@ -12,6 +12,7 @@ import LoginForm from '../../features/user/LoginForm'
 import { RootStoreContext } from '../stores/rootStore'
 import LoadingComponent from './LoadingComponent'
 import ModalContainer from '../common/modals/ModalContainer'
+import ProfilePage from '../../features/profiles/ProfilePage'
 
 const App: React.FC<RouteComponentProps> = ({ location }) => {
     const rootStore = useContext(RootStoreContext)
@@ -39,7 +40,7 @@ const App: React.FC<RouteComponentProps> = ({ location }) => {
                         <Route path='/anecdotes' component={AnecdoteDashboard} />
                         <Route path='/anecdote/:id' component={AnecdoteDetails} />
                         <Route key={location.key} path={['/create', '/edit/:id']} component={AnecdoteForm} />
-                        <Route path='/login' component={LoginForm} />
+                        <Route path='/profile/:username' component={ProfilePage} />
                         <Route component={NotFound} />
                     </Switch>
                 </Fragment>

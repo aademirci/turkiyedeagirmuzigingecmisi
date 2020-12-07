@@ -51,7 +51,6 @@ const AnecdoteForm: React.FC<RouteComponentProps<DetailParams>> = ({ match, hist
                 ...anecdote,
                 id: anecdoteIndex + 1
             }
-            console.log(anecdote)
             createAnecdote(newAnecdote)
         } else {
             editAnecdote(anecdote)
@@ -68,7 +67,7 @@ const AnecdoteForm: React.FC<RouteComponentProps<DetailParams>> = ({ match, hist
                     <Field name='date' placeholder='Tarih' value={anecdote.date} component={DateInput} />
                     <Field name='city' placeholder='Şehir' value={anecdote.city} component={TextInput} />
                     <Field name='venue' placeholder='Mekan' value={anecdote.venue} component={TextInput} />
-                    <Button positive type='submit' content='Submit' loading={submitting} disabled={loading || invalid || pristine} />
+                    <Button positive type='submit' content='Submit' loading={submitting} disabled={loading || invalid || pristine} onClick={() => setAnecdoteIndex(anecdoteIndex + 1)} />
                     <Button type='button' content='Iptal' onClick={anecdote.id ? () => history.push(`/anecdote/${anecdote.id}`) : () => history.push('/anecdotes')} disabled={loading} />
                 </Form>
             )} />

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -28,7 +29,9 @@ namespace Infrastructure.Security
 
             var anecdoteId = _httpContextAccessor.HttpContext.Request.RouteValues.SingleOrDefault(x => x.Key == "id").Value;
 
-            var anecdote = _context.Anecdotes.FindAsync(anecdoteId).Result;
+            var anecdoteIdInt = Convert.ToInt32(anecdoteId);
+
+            var anecdote = _context.Anecdotes.FindAsync(anecdoteIdInt).Result;
 
             var host = anecdote.UserAnecdotes.FirstOrDefault(x => x.IsOwner);
 

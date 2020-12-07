@@ -94,6 +94,12 @@ export default class AnecdoteStore {
         this.submitting = true
         try {
             await agent.Anecdotes.create(anecdote)
+            const favee = createFavee(this.rootStore.userStore.user!)
+            favee.isOwner = true
+            let favees = []
+            favees.push(favee)
+            anecdote.favees = favees
+            anecdote.isOwner = true
             runInAction('creating an anecdote', () => {
                 this.anecdoteRegistry.set(anecdote.id, anecdote)
                 this.submitting = false

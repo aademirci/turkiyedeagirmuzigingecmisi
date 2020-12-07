@@ -7,7 +7,7 @@ export const combineDateAndTime = (date: Date) => {
     const month = date.getMonth()
     const day = date.getDate()
 
-    return new Date(year, month, day)
+    return new Date(year, month, day, 12)
 }
 
 export const setAnecdoteProps = (anecdote: IAnecdote, user: IUser) => {
